@@ -38,7 +38,7 @@ export default async function BlogPage({params}: Parameters) {
   return (
     <>
       <div className="antialiased max-w-2xl mb-40 mx-4 mt-8 lg:mx-auto flex flex-col items-start">
-        <div className="title font-medium text-2xl tracking-tighter max-w-[1000px]">
+        <div className="title font-medium text-3xl tracking-tighter max-w-[1000px]">
           <h1>{props.frontMatter.title}</h1>
         </div>
 
