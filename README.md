@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Steady
+> Server Side Generated, MDX written articles created with NextJS 14
 
 ## Getting Started
-
-First, run the development server:
-
+Install Dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+bun install
+```
+
+Run in Development mode:
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Build for Production:
+```bash
+bun build
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Start Production Build:
+```bash
+bun start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Writing Articles
+Articles are written in the `content/articles` folder. The name of the file before the `.mdx` will be the url. 
 
-## Learn More
+In MDX you can set the title and description of the article enclosed by the `---` at the top of the file:
 
-To learn more about Next.js, take a look at the following resources:
+```mdx
+---
+title: "Hello, World!"
+description: "What a day to be alive"
+---
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Custom Components
+If you would like to use Custom Components in your articles, you need to include them in the `components/MDX/TheMDXRemote.tsx`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```
+import { Button } from "@/components/ui/button"
 
-## Deploy on Vercel
+const components = {
+  Button
+}
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+then in your article:
+```mdx
+Psychologically, the button has to be one of the most appealing elements on the page. Get that wrong and you fail. Take this button for example:
+
+<Button>Login</Button>
+
+Entranced by the look, you find the feel... and click it. Simply perfect
+```
