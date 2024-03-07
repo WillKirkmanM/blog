@@ -3,9 +3,16 @@ import path from "path"
 
 import matter from "gray-matter"
 
-type ArticleNameProps = { name: String }
 
-export async function getArticle({ name }: ArticleNameProps) {
+type Article = {
+  name: string,
+  title: string,
+  description: string
+}
+
+type ArticleName = { name: string }
+
+export async function getArticle({ name }: ArticleName) {
   const markdownFile = fs.readFileSync(
     path.join("content/articles", name + ".mdx"),
     "utf-8"
@@ -28,14 +35,15 @@ export function getAllArticles() {
       (fileName) => !fileName.startsWith(".") && fileName.endsWith(".mdx")
     );
 
-  const articles= fileNames.map((fileName) => {
+  const articles: Article[] = fileNames.map((fileName) => {
     const fullPath = path.join(articleDirectory, fileName);
     const fileContents = fs.readFileSync(fullPath, "utf8");
     const { data: frontMatter } = matter(fileContents);
 
     return {
-      slug: fileName.replace(".mdx", ""),
-      ...frontMatter,
+      name: fileName.replace(".mdx", ""),
+      title: frontMatter.title,
+      description: frontMatter.description,
     };
   });
 
@@ -65,8 +73,8 @@ export function getStaticParams(files: string[]): ParamsArray {
   return params
 }
 
-export async function getMetadataFields({ name }: ArticleNameProps) {
-  const article = (await getArticle({ name }))
+export async function getMetadataFields({ name }: ArticleName) {
+  const article = await getArticle({ name: name })
 
   const title = article.frontMatter.title;
   const description = article.frontMatter.description;
