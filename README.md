@@ -46,6 +46,14 @@ const components = {
 
 ```
 
+You can also modify existing behaviour:
+```ts
+  const components = {
+    h1: (props) => <h1 className="text-3xl" {...props} />,
+    ol: (props: any) => <ol className="list-decimal" {...props} />
+  }
+```
+
 then in your article:
 ```mdx
 Psychologically, the button has to be one of the most appealing elements on the page. Get that wrong and you fail. Take this button for example:
