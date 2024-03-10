@@ -1,6 +1,8 @@
 # Steady
 > Server Side Generated, MDX written articles created with NextJS 14
 
+![Google Lighthouse Report](https://github.com/WillKirkmanM/steady/assets/98240335/33bdd03e-2a9b-45af-92ae-083e53ae1ac3)
+
 ## Getting Started
 Install Dependencies:
 ```bash
