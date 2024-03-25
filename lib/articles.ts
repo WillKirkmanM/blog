@@ -2,29 +2,51 @@ import fs from "fs"
 import path from "path"
 
 import matter from "gray-matter"
+import mammoth from "mammoth"
 
 
-type Article = {
+type ArticleProperties = {
   name: string,
   title: string,
   description: string
 }
 
+type Article = {
+  frontMatter: any | undefined,
+  name: string | undefined,
+  content: string | undefined
+  HTMLContent: string | undefined
+}
+
 type ArticleName = { name: string }
 
-export async function getArticle({ name }: ArticleName) {
-  const markdownFile = fs.readFileSync(
-    path.join("content/articles", name + ".mdx"),
-    "utf-8"
-  );
-  const { data: frontMatter, content } = matter(markdownFile);
+export async function getArticle({ name }: ArticleName): Promise<Article> {
+  let articlePath = "content/articles/" + name
+  if (fs.existsSync(articlePath + ".docx")) {
+    let { value: HTMLContent } = await mammoth.convertToHtml({ path: articlePath + ".docx" })
 
-  return {
-    frontMatter,
-    name,
-    content,
-  };
+    return {
+      frontMatter: undefined,
+      name: undefined,
+      content: undefined,
+      HTMLContent
+    }
+  }
 
+  if (fs.existsSync(articlePath + ".mdx")) {
+    const markdownFile = fs.readFileSync(
+      path.join(articlePath + ".mdx"), "utf-8");
+    const { data: frontMatter, content } = matter(markdownFile);
+
+    return {
+      frontMatter,
+      name,
+      content,
+      HTMLContent: undefined
+    };
+  }
+
+  return { frontMatter: undefined, name: undefined, content: undefined, HTMLContent: undefined }
 }
 
 export function getAllArticles() {
@@ -32,20 +54,33 @@ export function getAllArticles() {
   const fileNames = fs
     .readdirSync(articleDirectory)
     .filter(
-      (fileName) => !fileName.startsWith(".") && fileName.endsWith(".mdx")
+      (fileName) => !fileName.startsWith(".") && (fileName.endsWith(".mdx") || fileName.endsWith(".docx"))
     );
 
-  const articles: Article[] = fileNames.map((fileName) => {
+  let articles: ArticleProperties[] = [];
+  fileNames.map((fileName) => {
     const fullPath = path.join(articleDirectory, fileName);
     const fileContents = fs.readFileSync(fullPath, "utf8");
-    const { data: frontMatter } = matter(fileContents);
 
-    return {
-      name: fileName.replace(".mdx", ""),
-      title: frontMatter.title,
-      description: frontMatter.description,
-    };
-  });
+    if (fileName.endsWith(".docx")) {
+      articles.push({
+        name: fileName.split(".")[0],
+        title: "Word Document",
+        description: "To be implemented"
+      }
+      )
+    }
+
+    if (fileName.endsWith(".mdx")) {
+      const { data: frontMatter } = matter(fileContents);
+
+      articles.push({
+        name: fileName.split(".")[0],
+        title: frontMatter.title,
+        description: frontMatter.description,
+      })
+    }
+  })
 
   return articles;
 }
@@ -56,18 +91,9 @@ export function getStaticParams(files: string[]): ParamsArray {
   let params = []
 
   for (const filename of files) {
-    const fullPath = path.join("content/articles", filename);
-    const fileContents = fs.readFileSync(fullPath, "utf8");
-
-    const { data: frontMatter } = matter(fileContents);
-
-    const articleDate = new Date(frontMatter.date);
-    const currentDate = new Date();
-    const isFuture = articleDate > currentDate;
-
-    if (!isFuture) {
-      params.push({ name: filename.replace(".mdx", "") });
-    }
+    // const fullPath = path.join("content/articles", filename);
+    // const fileContents = fs.readFileSync(fullPath, "utf8");
+    params.push({ name: filename.split(".")[0] });
   }
 
   return params
@@ -76,8 +102,17 @@ export function getStaticParams(files: string[]): ParamsArray {
 export async function getMetadataFields({ name }: ArticleName) {
   const article = await getArticle({ name: name })
 
-  const title = article.frontMatter.title;
-  const description = article.frontMatter.description;
+  let title, description
+
+  if (article.HTMLContent) {
+    title = name
+    description = "To be implemented."
+  }
+
+  if (article.content) {
+    title = article.frontMatter.title;
+    description = article.frontMatter.description;
+  }
 
   const canonicalURL = `${process.env.next_public_base_url}/${name}`;
 
