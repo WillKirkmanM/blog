@@ -105,7 +105,7 @@ export async function getMetadataFields({ name }: ArticleName) {
   let title, description
 
   if (article.HTMLContent) {
-    title = name
+    title = name.replace("-", " ").toUpperCase()
     description = "To be implemented."
   }
 
