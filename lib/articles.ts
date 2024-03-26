@@ -65,7 +65,7 @@ export function getAllArticles() {
     if (fileName.endsWith(".docx")) {
       articles.push({
         name: fileName.split(".")[0],
-        title: "Word Document",
+        title: fileName.replace("-", " ").toUpperCase(),
         description: "To be implemented"
       }
       )
