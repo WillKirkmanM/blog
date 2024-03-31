@@ -4,8 +4,6 @@ import path from "path"
 import matter from "gray-matter"
 import mammoth from "mammoth"
 
-import { formattedLastModifiedDate } from "./utils"
-
 type Article = {
   name: string,
   title: string,
@@ -65,21 +63,22 @@ export function getAllArticles() {
 
   fileNames.map((fileName) => {
     const fullPath = path.join(articleDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, "utf8");
     const name = fileName.split(".")[0]
     const title = fileName.replace(".docx", "").split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
-
-    const description = `Written ${formattedLastModifiedDate(fullPath)}`
-
+    
     if (fileName.endsWith(".docx")) {
+      const description = `Written ${formattedLastModifiedDate(fullPath)}`
+
       articles.push({
         name,
         title,
         description
       })
     }
-
+    
     if (fileName.endsWith(".mdx")) {
+      const fileContents = fs.readFileSync(fullPath, "utf8");
+      
       const { data: frontMatter } = matter(fileContents);
       const { title, description } = frontMatter
 
@@ -90,6 +89,55 @@ export function getAllArticles() {
       })
     }
   })
+
+  return articles;
+}
+
+type AllArticleProperties = (Article &  {
+  content: string
+})[]
+
+
+export async function getAllArticleProperties(): Promise<AllArticleProperties> {
+  const articleDirectory = path.join(process.cwd(), "content/articles");
+  const fileNames = fs
+    .readdirSync(articleDirectory)
+    .filter((fileName) => !fileName.startsWith(".") && (fileName.endsWith(".mdx") || fileName.endsWith(".docx")));
+
+  let articles: AllArticleProperties = [];
+
+  for (const fileName of fileNames) {
+    const fullPath = path.join(articleDirectory, fileName);
+    const fileContents = fs.readFileSync(fullPath, "utf8");
+    const name = fileName.split(".")[0]
+    const title = fileName.replace(".docx", "").split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+
+    const description = `Written ${formattedLastModifiedDate(fullPath)}`
+
+    if (fileName.endsWith(".docx")) {
+      let { value: content } = await mammoth.convertToHtml({ path: fullPath })
+      content = content.replace(/<[^>]*>/g, ''); // This removes every HTML tag <p> <h1> ... This is because search can't index through text within html tags as they are treated as one token.
+
+      articles.push({
+        name,
+        title,
+        description,
+        content
+      })
+    }
+
+    if (fileName.endsWith(".mdx")) {
+      const { data: frontMatter, content } = matter(fileContents);
+      const { title, description } = frontMatter
+
+      articles.push({
+        name,
+        title,
+        description,
+        content
+      })
+    }
+  }
 
   return articles;
 }
@@ -124,4 +172,17 @@ export async function getMetadataFields({ name }: ArticleName) {
   const canonicalURL = `${process.env.next_public_base_url}/${name}`;
 
   return { title, description, canonicalURL }
+}
+
+/**
+ * This function returns the last modified date in DD/MM/YY format.
+ * @param {string} path
+ * @returns {string} 
+ */
+export function formattedLastModifiedDate(path: string): string {
+    const lastModified = fs.statSync(path).mtime;
+    const lastModifiedDate = new Date(lastModified);
+    const formattedLastModified = `${("0" + lastModifiedDate.getDate()).slice(-2)}/${("0" + (lastModifiedDate.getMonth() + 1)).slice(-2)}/${lastModifiedDate.getFullYear().toString().substr(-2)}`;
+
+    return formattedLastModified
 }
