@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function SearchBar() {
   
@@ -16,6 +16,8 @@ export default function SearchBar() {
     name:        string;
     description: string;
   }
+
+  const [query, setQuery] = useState("")
   const [results, setResults] = useState<Result[]>([]);
 
   const search = async (query: string) => {
@@ -24,12 +26,29 @@ export default function SearchBar() {
     setResults(data.results);
   }
 
+  
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setResults([]);
+        setQuery('');
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, []);
+
   return (
-    <div className="relative mx-auto w-1/2 mt-10">
+    <div className="relative mx-auto w-1/2" >
       <Input 
-        className="  w-full border-2 border-gray-300 rounded-md"
+        className="w-full border-2 border-gray-300 rounded-md"
         placeholder="Search an Article"
+        value={query}
         onChange={(e) => {
+          setQuery(e.target.value); 
           search(e.target.value);
         }}
       />
