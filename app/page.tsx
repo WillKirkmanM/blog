@@ -1,4 +1,3 @@
-import SearchBar from "@/components/Search/SearchBar";
 import {
   Card,
   CardDescription,
@@ -13,10 +12,7 @@ export default function Home() {
 
   return (
     <>
-      <SearchBar />
-      <h1 className="p-10 text-center text-4xl">Steady Ground</h1>
-
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-10">
         <h2 className="text-2xl text-left">Your Articles</h2>
       </div>
       {articles.map(article => (
