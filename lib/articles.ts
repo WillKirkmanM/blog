@@ -169,7 +169,7 @@ export async function getMetadataFields({ name }: ArticleName) {
     description = article.frontMatter.description;
   }
 
-  const canonicalURL = `${process.env.next_public_base_url}/${name}`;
+  const canonicalURL = `${process.env.NEXT_PUBLIC_BASE_URL}/${name}`;
 
   return { title, description, canonicalURL }
 }
