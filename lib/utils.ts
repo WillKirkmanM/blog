@@ -1,5 +1,3 @@
-import { statSync } from "fs"
-
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
