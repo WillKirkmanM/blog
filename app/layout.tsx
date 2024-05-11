@@ -6,8 +6,11 @@ import NavBar from "@/components/Navbar/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "On Steady Ground",
-  description: "The Interactive Blog",
+  title: {
+    default: "Steady",
+    template: "%s | Steady"
+  },
+  description: "Steady is the open platform for free thinkers and dilligent readers.",
 };
 
 export default function RootLayout({
